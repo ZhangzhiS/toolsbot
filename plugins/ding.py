@@ -30,6 +30,7 @@ __plugin_author__ = "ZhangS"
 # status 插件是否启用
 __plugin_settings__ = {
     "status": True,
+    "is_admin": True,
 }
 
 # 插件配置

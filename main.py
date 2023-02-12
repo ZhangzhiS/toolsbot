@@ -14,7 +14,7 @@ driver.register_adapter(Adapter)
 driver.on_startup(init)
 
 # 加载插件
-# nonebot.load_plugins("plugins")
+nonebot.load_plugins("basic_plugins")
 nonebot.load_plugin("plugins.dong")
 nonebot.load_plugin("plugins.ding")
 
