@@ -9,6 +9,7 @@ nonebot.init()
 # 注册适配器
 driver = nonebot.get_driver()
 driver.register_adapter(Adapter)
+confog = driver.config
 
 # 初始数据
 driver.on_startup(init)
