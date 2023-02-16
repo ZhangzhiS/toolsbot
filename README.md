@@ -1,3 +1,5 @@
+<div align=center><img src="https://raw.githubusercontent.com/HibiKier/zhenxun_bot/main/logo.png"/></div>
+
 ![maven](https://img.shields.io/badge/python-3.8%2B-blue)
 ![maven](https://img.shields.io/badge/nonebot-2.0.0-yellow)
 ![maven](https://img.shields.io/badge/go--cqhttp-1.0.0-red)
@@ -11,5 +13,4 @@
 
 框架自带的一些必要插件
 
-[] 权限管理
 
