@@ -1,0 +1,14 @@
+[project]
+name = "toolsbot"
+version = "0.1.0"
+description = "toolsbot"
+readme = "README.md"
+requires-python = ">=3.8, <4.0"
+
+[tool.nonebot]
+adapters = [
+    
+]
+plugins = []
+plugin_dirs = ["toolsbot/plugins"]
+builtin_plugins = []
