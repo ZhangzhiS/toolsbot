@@ -18,3 +18,12 @@ class CallBackPayload(BaseModel):
     to_me: Optional[bool] = None
 
 
+class LoginWxUserInfo(BaseModel):
+    wxid: str
+    name: str
+    mobile: str
+    home: str
+
+
+class LoginWxUserResponse(BaseModel):
+    Payload: LoginWxUserInfo

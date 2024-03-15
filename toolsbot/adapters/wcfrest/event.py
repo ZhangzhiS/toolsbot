@@ -1,9 +1,8 @@
 from enum import Enum
+from typing import Optional
 from typing_extensions import override
 
-from pydantic import BaseModel
 from nonebot.adapters import Event as BaseEvent
-from nonebot.compat import model_dump
 
 from .message import Message
 
@@ -15,14 +14,12 @@ class EventType(Enum):
 
 
 class Event(BaseEvent):
-
     is_self: bool
     is_group: bool
     sender: str
     content: str
     type_: int
-    is_at_me: bool
-    roomid: str
+    roomid: Optional[str]
     to_me: bool
 
     @classmethod
@@ -30,12 +27,13 @@ class Event(BaseEvent):
         event_map = {
             1: MessageEvent,
         }
-        _type = data.get("type", 0)
-        if _type is None:
+        type_ = data.get("type", 0)
+        data["type_"] = type_
+        if type_ is None:
             raise ValueError("CallBack type Error!!")
-        if _type not in event_map:
+        if type_ not in event_map:
             raise ValueError("CallBack type ERROR!!")
-        return event_map[_type].model_validate(data)
+        return event_map[type_].model_validate(data)
 
     @override
     def get_type(self) -> str:
@@ -80,7 +78,7 @@ class Event(BaseEvent):
 
 
 class MessageEvent(Event):
-
+    
     @override
     def get_type(self) -> str:
         return "message"
@@ -92,14 +90,13 @@ class MessageEvent(Event):
         return self.content
 
     def api(self) -> str:
-        return "text"
-    
+        return "wcf/sent_text"
+
     def method(self) -> str:
         return "post"
-    
+
     def reply_data(self, message: str) -> dict:
         receiver = self.sender
         if self.is_group:
             receiver = self.roomid
         return dict(receiver=receiver, msg=message, aters="")
-

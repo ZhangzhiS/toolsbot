@@ -1,5 +1,6 @@
 from typing import Type, Union, Mapping, Iterable
 from typing_extensions import override
+from nonebot import logger
 
 from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
 
@@ -13,11 +14,15 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @override
     def __str__(self) -> str:
-        raise NotImplementedError
+        return self.data.get("content", "")
 
     @override
     def is_text(self) -> bool:
-        raise NotImplementedError
+        return True
+
+    @staticmethod
+    def text(text: str) -> "MessageSegment":
+        return MessageSegment("text", {"text": text})
 
 
 class Message(BaseMessage[MessageSegment]):
@@ -30,4 +35,4 @@ class Message(BaseMessage[MessageSegment]):
     @staticmethod
     @override
     def _construct(msg: str) -> Iterable[MessageSegment]:
-        raise NotImplementedError
+        yield MessageSegment.text(msg)
