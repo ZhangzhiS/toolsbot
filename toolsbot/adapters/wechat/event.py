@@ -1,3 +1,4 @@
+from typing import Any
 from typing_extensions import override
 from nonebot import logger
 
@@ -28,6 +29,11 @@ class Event(BaseEvent):
             raise ValueError("CallBack type NOT FOUND!!")
         if _type not in event_map:
             raise ValueError("CallBack type ERROR!!")
+        if _type == 1:
+            if data.get("is_group"):
+                return GroupMessageEvent.model_validate(data)
+            else:
+                return PrivateMessageEvent.model_validate(data)
         return event_map[_type].model_validate(data)
 
     @override
@@ -78,7 +84,6 @@ class MessageEvent(Event):
     def is_tome(self) -> bool:
         return True
 
-
     @override
     def get_type(self) -> str:
         return "message"
@@ -92,13 +97,27 @@ class MessageEvent(Event):
 
     def api(self) -> str:
         return "text"
-    
+
     def method(self) -> str:
         return "post"
-    
+
     def reply_data(self, message: str) -> dict:
         receiver = self.sender
         if self.is_group:
             receiver = self.roomid
         return dict(receiver=receiver, msg=message, aters="")
+
+
+class GroupMessageEvent(MessageEvent):
+
+    @override
+    def is_tome(self) -> bool:
+        return self.is_at_me
+
+
+class PrivateMessageEvent(MessageEvent):
+
+    @override
+    def is_tome(self) -> bool:
+        return True
 

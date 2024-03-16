@@ -1,5 +1,5 @@
 import nonebot
-from toolsbot.adapters.wcfrest.adapter import Adapter as WechatAdapter
+from toolsbot.adapters.wechat.adapter import Adapter as WechatAdapter
 
 nonebot.init()
 

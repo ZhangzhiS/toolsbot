@@ -36,3 +36,5 @@ class Message(BaseMessage[MessageSegment]):
     @override
     def _construct(msg: str) -> Iterable[MessageSegment]:
         yield MessageSegment.text(msg)
+
+
