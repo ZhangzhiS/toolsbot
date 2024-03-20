@@ -53,10 +53,6 @@ class Event(BaseEvent):
         raise ValueError("Event has no message!")
 
     @override
-    def get_plaintext(self) -> str:
-        raise ValueError("Event has no plaintext!")
-
-    @override
     def get_user_id(self) -> str:
         raise ValueError("Event has no user_id!")
 

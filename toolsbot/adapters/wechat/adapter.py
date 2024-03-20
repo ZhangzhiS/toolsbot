@@ -1,23 +1,18 @@
+import asyncio
 import os
 import json
-from typing import Any
+from typing import Any, cast
 from typing_extensions import override
+from nonebot import logger
 
-from nonebot import get_plugin_config, logger
-from nonebot.exception import WebSocketClosed
-from nonebot.utils import DataclassEncoder, escape_tag
 from nonebot.drivers import (
     URL,
     Driver,
     Request,
     Response,
-    WebSocket,
-    ForwardDriver,
-    ReverseDriver,
     ASGIMixin,
     HTTPClientMixin,
     HTTPServerSetup,
-    WebSocketServerSetup,
 )
 
 from nonebot.adapters import Adapter as BaseAdapter
@@ -27,17 +22,15 @@ from .bot import Bot
 from .log import log
 from .event import Event
 from .config import Config
+from .exception import WechatHookException
 from .model import GetUserInfoResponse
-from .message import Message, MessageSegment
 
 
 class Adapter(BaseAdapter):
 
-    @override
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
         self.default_wechat_url = "http://192.168.68.111:10010/"
-        self.bot: Bot
         self.bot_config: Config
         self.setup()
 
@@ -61,32 +54,12 @@ class Adapter(BaseAdapter):
             self.__handle_http,
         )
         self.setup_http_server(setup)
-        self.driver.on_startup(self.register_bot)
+        # self.driver.on_startup(self._register_bot)
 
     def check_at_bot(self, msg_content: str) -> bool:
         return f"@{self.bot_config.nickname}" in msg_content
 
-    async def __handle_http(self, request: Request) -> Response:
-        if (data := request.content) is not None:
-            data = json.loads(data)
-        if not isinstance(data, dict):
-            return Response(500, content="Received non-JSON data, cannot cast to dict")
-        data["is_at_me"] = self.check_at_bot(data.get("content", ""))
-        del data["xml"]
-        if event := Event.json_to_event(data):
-            await self.bot.handle_event(event)
-        return Response(200)
-
-    async def send_request(self, request: Request):
-        if not isinstance(self.driver, HTTPClientMixin):
-            raise RuntimeError(
-                f"Current driver {self.config.driver} "
-                "doesn't support http client requests!"
-                f"{self.get_name()} Adapter needs a HTTPClient Driver to work."
-            )
-        return await self.driver.request(request)
-
-    async def register_bot(self):
+    async def _register_bot(self, config: Config) -> None:
         api = "userinfo"
         url = os.path.join(self.default_wechat_url, api)
         req = Request(
@@ -99,15 +72,53 @@ class Adapter(BaseAdapter):
         if (data := resp.content) is not None:
             data = json.loads(data)
             userinfo_resp = GetUserInfoResponse.model_validate(data)
-            log("DEBUG", str(userinfo_resp))
             bot_config = Config(
                 wxid=userinfo_resp.data.wxid,
                 url=self.default_wechat_url,
                 nickname=userinfo_resp.data.name,
             )
             self.bot_config = bot_config
-            self.bot = Bot(self, self_id=userinfo_resp.data.wxid, config=bot_config)
-            self.bot_connect(self.bot)
+            bot = Bot(self, self_id=userinfo_resp.data.wxid, config=bot_config)
+            self.bot_connect(bot)
+
+    def _check_request(self, request: Request) -> Config:
+        if request.method != "POST":
+            raise WechatHookException("请求方式错误")
+        url = URL(request.url)
+        wxid = url.query.get("robot")
+        host = url.query.get("host")
+        if not wxid or not host:
+            raise WechatHookException("请求缺少参数")
+        config = dict(wxid=wxid, callback_url=host, nickname="")
+        return Config.model_validate(config)
+
+    async def __handle_http(self, request: Request) -> Response:
+        try:
+            config = self._check_request(request)
+        except WechatHookException as e:
+            logger.error(e)
+            return Response(400, content=str(e))
+        if (data := request.content) is not None:
+            data = json.loads(data)
+        if not isinstance(data, dict):
+            return Response(500, content="Received non-JSON data, cannot cast to dict")
+        if not self.bots.get(config.wxid):
+            await self._register_bot(config)
+        bot = self.bots.get(config.wxid)
+        data["is_at_me"] = self.check_at_bot(data.get("content", ""))
+        del data["xml"]
+        if event := Event.json_to_event(data):
+            asyncio.create_task(cast(Bot, bot).handle_event(event))
+        return Response(200)
+
+    async def send_request(self, request: Request):
+        if not isinstance(self.driver, HTTPClientMixin):
+            raise RuntimeError(
+                f"Current driver {self.config.driver} "
+                "doesn't support http client requests!"
+                f"{self.get_name()} Adapter needs a HTTPClient Driver to work."
+            )
+        return await self.driver.request(request)
 
     @classmethod
     @override

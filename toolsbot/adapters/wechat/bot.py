@@ -1,5 +1,4 @@
-import os
-from typing import  TYPE_CHECKING, List, Union, Any
+from typing import TYPE_CHECKING, Union, Any
 from typing_extensions import override
 from nonebot import logger
 
@@ -15,8 +14,6 @@ if TYPE_CHECKING:
 
 
 class Bot(BaseBot):
-
-    @override
     def __init__(self, adapter: "Adapter", self_id: str, config: Config, **kwargs: Any):
         super().__init__(adapter, self_id)
         self.wx_config: Config = config
@@ -30,7 +27,7 @@ class Bot(BaseBot):
     ) -> Any:
         api = event.api()
         method = event.method()
-        data = event.reply_data(message)
+        data = event.reply_data("")
         await self.call_api(api, method=method, data=data)
 
     async def handle_event(self, event: Event) -> None:
