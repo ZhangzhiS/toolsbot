@@ -1,10 +1,6 @@
-from typing import Any
 from typing_extensions import override
-from nonebot import logger
 
-from pydantic import BaseModel
 from nonebot.adapters import Event as BaseEvent
-from nonebot.compat import model_dump
 
 from .message import Message
 from .model import MSG_TYPE
@@ -38,7 +34,7 @@ class Event(BaseEvent):
 
     @override
     def get_type(self) -> str:
-        return str(self.type)
+        return "message"
 
     @override
     def get_event_name(self) -> str:
@@ -58,11 +54,13 @@ class Event(BaseEvent):
 
     @override
     def get_session_id(self) -> str:
-        raise ValueError("Event has no session_id!")
+        return self.sender
 
     @override
     def is_tome(self) -> bool:
-        return False
+        if self.is_group and self.is_at_me is False:
+            return True
+        return True
 
     def api(self) -> str:
         raise ValueError("Event has no api!")
@@ -75,7 +73,6 @@ class Event(BaseEvent):
 
 
 class MessageEvent(Event):
-
     @override
     def is_tome(self) -> bool:
         return True
@@ -85,8 +82,10 @@ class MessageEvent(Event):
         return "message"
 
     def get_message(self) -> Message:
-        logger.warning("调用 Get Message")
-        return Message("self.content")
+        msg = Message(self.content)
+        # msg_seq = MessageSegment("text", {"data": self.content})
+        # msg.append(msg_seq)
+        return msg
 
     def get_plaintext(self) -> str:
         return self.content
@@ -105,15 +104,12 @@ class MessageEvent(Event):
 
 
 class GroupMessageEvent(MessageEvent):
-
     @override
     def is_tome(self) -> bool:
         return self.is_at_me
 
 
 class PrivateMessageEvent(MessageEvent):
-
     @override
     def is_tome(self) -> bool:
         return True
-

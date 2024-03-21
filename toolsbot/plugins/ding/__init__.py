@@ -1,7 +1,7 @@
 
 # from nonebot.params import Command
 from nonebot.plugin import PluginMetadata
-from nonebot import on_keyword
+from nonebot import logger, on_keyword
 from nonebot.rule import to_me
 
 

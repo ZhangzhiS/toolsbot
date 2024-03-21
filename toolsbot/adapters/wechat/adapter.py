@@ -74,7 +74,7 @@ class Adapter(BaseAdapter):
             userinfo_resp = GetUserInfoResponse.model_validate(data)
             bot_config = Config(
                 wxid=userinfo_resp.data.wxid,
-                url=self.default_wechat_url,
+                callback_url=self.default_wechat_url,
                 nickname=userinfo_resp.data.name,
             )
             self.bot_config = bot_config
@@ -90,6 +90,7 @@ class Adapter(BaseAdapter):
         if not wxid or not host:
             raise WechatHookException("请求缺少参数")
         config = dict(wxid=wxid, callback_url=host, nickname="")
+        logger.warning(config)
         return Config.model_validate(config)
 
     async def __handle_http(self, request: Request) -> Response:
@@ -133,7 +134,7 @@ class Adapter(BaseAdapter):
                 "doesn't support http client requests!"
                 f"{self.get_name()} Adapter needs a HTTPClient Driver to work."
             )
-        url = os.path.join(bot.wx_config.url, api)
+        url = os.path.join(bot.wx_config.callback_url, api)
         req = Request(
             data["method"],
             url,

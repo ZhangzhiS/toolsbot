@@ -27,7 +27,7 @@ class Bot(BaseBot):
     ) -> Any:
         api = event.api()
         method = event.method()
-        data = event.reply_data("")
+        data = event.reply_data(str(message))
         await self.call_api(api, method=method, data=data)
 
     async def handle_event(self, event: Event) -> None:

@@ -14,7 +14,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
 
     @override
     def __str__(self) -> str:
-        return self.data.get("content", "")
+        return self.data.get("text", "")
 
     @override
     def is_text(self) -> bool:
