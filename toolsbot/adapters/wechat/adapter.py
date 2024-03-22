@@ -19,15 +19,14 @@ from nonebot.adapters import Adapter as BaseAdapter
 
 
 from .bot import Bot
-from .log import log
 from .event import Event
 from .config import Config
 from .exception import WechatHookException
 from .model import GetUserInfoResponse
+from toolsbot.utils.auth import parse_code
 
 
 class Adapter(BaseAdapter):
-
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
         self.default_wechat_url = "http://192.168.68.111:10010/"
@@ -85,8 +84,8 @@ class Adapter(BaseAdapter):
         if request.method != "POST":
             raise WechatHookException("请求方式错误")
         url = URL(request.url)
-        wxid = url.query.get("robot")
-        host = url.query.get("host")
+        code = url.query.get("code")
+        wxid, host = parse_code(code)
         if not wxid or not host:
             raise WechatHookException("请求缺少参数")
         config = dict(wxid=wxid, callback_url=host, nickname="")

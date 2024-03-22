@@ -1,3 +1,4 @@
+from nonebot import logger
 from typing_extensions import override
 
 from nonebot.adapters import Event as BaseEvent
@@ -18,9 +19,11 @@ class Event(BaseEvent):
     @classmethod
     def json_to_event(cls, data: dict) -> "Event":
         event_map = {
-            1: MessageEvent,
+            MSG_TYPE.TEXT_MSG.value: MessageEvent,
+            MSG_TYPE.NOTICE_MSG.value: NoticeEvent,
         }
         _type = data.get("type", 0)
+        logger.error(data)
         if not _type:
             raise ValueError("CallBack type NOT FOUND!!")
         if _type not in event_map:
@@ -113,3 +116,9 @@ class PrivateMessageEvent(MessageEvent):
     @override
     def is_tome(self) -> bool:
         return True
+
+
+class NoticeEvent(Event):
+
+    def get_type(self) -> str:
+        return "notice"
