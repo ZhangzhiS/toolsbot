@@ -3,6 +3,8 @@
 from nonebot.plugin import PluginMetadata
 from nonebot import logger, on_keyword
 from nonebot.rule import to_me
+from toolsbot.adapters.wechat.api import SendTextMessage
+from toolsbot.adapters.wechat.event import Event
 
 
 __plugin_meta__ = PluginMetadata(
@@ -21,5 +23,8 @@ wxid = on_keyword(
 
 
 @wxid.handle()
-async def _():
-    await wxid.send("dong")
+async def _(event: Event):
+    wx_ctrl=SendTextMessage.model_validate(
+            dict(post_data={"receiver": event.sender, "msg": "dong", "aters": ""})
+        )
+    await wxid.send(message="", wx_ctrl=wx_ctrl)

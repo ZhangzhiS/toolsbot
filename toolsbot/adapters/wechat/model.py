@@ -49,3 +49,11 @@ class WeChatHttpApiResponse(BaseModel):
 
 class GetUserInfoResponse(WeChatHttpApiResponse):
     data: WechatUserInfo
+
+
+
+class TextMsgReply(BaseModel):
+    api: str = ""
+    msg: str
+    receiver: str
+    aters: str = ""

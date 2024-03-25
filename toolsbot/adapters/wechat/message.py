@@ -4,6 +4,8 @@ from nonebot import logger
 
 from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
 
+from toolsbot.adapters.wechat.model import TextMsgReply
+
 
 class MessageSegment(BaseMessageSegment["Message"]):
 
@@ -23,6 +25,14 @@ class MessageSegment(BaseMessageSegment["Message"]):
     @staticmethod
     def text(text: str) -> "MessageSegment":
         return MessageSegment("text", {"text": text})
+
+    @staticmethod
+    def text_reply(data: dict) -> "MessageSegment":
+        return MessageSegment("text", data)
+
+
+class DiscountSegment(MessageSegment):
+    pass
 
 
 class Message(BaseMessage[MessageSegment]):
