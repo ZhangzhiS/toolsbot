@@ -29,9 +29,9 @@ class Event(BaseEvent):
             raise ValueError("CallBack type ERROR!!")
         if _type == 1:
             if data.get("is_group"):
-                return GroupMessageEvent.validate(data)
+                return GroupMessageEvent.model_validate(data)
             else:
-                return PrivateMessageEvent.validate(data)
+                return PrivateMessageEvent.model_validate(data)
         return event_map[_type].model_validate(data)
 
     @override

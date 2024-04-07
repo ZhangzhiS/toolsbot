@@ -12,11 +12,15 @@ class WechatHookApi(BaseModel):
 
     api: str = ""
     method: METHOD = METHOD.GET
-    params: Optional[dict] = {}
-    post_data: Optional[dict] = {}
 
+    def validate(self) -> bool:
+        return True
 
-class SendTextMessage(WechatHookApi):
-    api: str = "text"
-    method: METHOD = METHOD.POST
+class SendTextMessageAPI(WechatHookApi):
+    api: Optional[str] = "text"
+    method: Optional[METHOD] = METHOD.POST
 
+class TextMessageParams(BaseModel):
+    at: str
+    receiver: str
+    msg: str

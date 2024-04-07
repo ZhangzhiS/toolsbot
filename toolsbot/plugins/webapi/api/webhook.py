@@ -1,12 +1,14 @@
-import asyncio
+import time
+import httpx
 from typing import Optional
 from fastapi import APIRouter
-from nonebot import get_bot, logger
+from nonebot import get_driver
 from pydantic import BaseModel
 
 from toolsbot.adapters.wechat.bot import Bot
 
 utils_route = APIRouter(prefix="/wh")
+config = get_driver().config
 
 
 class WebHookParams(BaseModel):
@@ -25,14 +27,28 @@ async def push_to_wechat(r: WebHookParams):
     msg = r.title
     if r.content:
         msg = f"{r.title}\n----------------\n{r.content}"
-    try:
-        bot = get_bot(r.sender)
-    except KeyError:
-        logger.warning(f'No bot with specific id: {r.sender}')
-        return
-    except ValueError:
-        logger.warning('No bot available or driver not initialized')
-        return
     if r.receiver is None:
         r.receiver = ""
-    await bot.send("", msg)
+    buile_callback_data = dict(
+        is_self=False,
+        is_group=False,
+        id=6666,
+        ts=time.time(),
+        room_id="",
+        content=msg,
+        sender=r.sender,
+        sign="",
+        thumb="",
+        extra="",
+        xml="",
+    )
+    async with httpx.AsyncClient() as client:
+        params = dict(
+            code="d3hpZF9seXhxN2hub3k4ZDQyMnxodHRwOi8vMTkyLjE2OC42OC4xMTE6MTAwMTAv"
+        )
+        response = await client.post(
+            f"http://localhost:{config.port}/wechat/callback",
+            params=params,
+            data=buile_callback_data,
+        )
+        return response.json()

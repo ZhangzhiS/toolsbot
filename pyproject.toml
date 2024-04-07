@@ -20,3 +20,15 @@ exclude = [
   "**/__pycache__",
 ]
 # reportIncompatibleMethodOverride = "none"
+pythonPlatform = "All"
+defineConstant = { PYDANTIC_V2 = true }
+executionEnvironments = [
+  { root = "./tests", extraPaths = [
+    "./",
+  ] },
+  { root = "./" },
+]
+
+typeCheckingMode = "basic"
+reportShadowedImports = false
+disableBytesTypePromotions = true

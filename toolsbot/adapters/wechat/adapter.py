@@ -55,12 +55,12 @@ class Adapter(BaseAdapter):
         self.setup_http_server(setup)
         # self.driver.on_startup(self._register_bot)
 
-    def check_at_bot(self, msg_content: str) -> bool:
-        return f"@{self.bot_config.nickname}" in msg_content
+    def check_at_bot(self, bot, msg_content: str) -> bool:
+        return f"@{bot.wx_config.nickname}" in msg_content
 
     async def _register_bot(self, config: Config) -> None:
         api = "userinfo"
-        url = os.path.join(self.default_wechat_url, api)
+        url = os.path.join(config.callback_url, api)
         req = Request(
             "get",
             url,
@@ -105,7 +105,7 @@ class Adapter(BaseAdapter):
         if not self.bots.get(config.wxid):
             await self._register_bot(config)
         bot = self.bots.get(config.wxid)
-        data["is_at_me"] = self.check_at_bot(data.get("content", ""))
+        data["is_at_me"] = self.check_at_bot(bot, data.get("content", ""))
         del data["xml"]
         if event := Event.json_to_event(data):
             asyncio.create_task(cast(Bot, bot).handle_event(event))
