@@ -6,10 +6,12 @@ on:
 
 jobs:
   build:
-    runs-on: centos-latest
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v3
+    - name: Install Rsync
+      run: DEBIAN_FRONTEND=noninteractive apt-get -y update && sudo DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y install rsync
     - name: Deploy to Server
       uses: easingthemes/ssh-deploy@main
       with:
