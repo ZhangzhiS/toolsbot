@@ -10,14 +10,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Install Rsync
-      run: DEBIAN_FRONTEND=noninteractive apt-get -y update && DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y install rsync
     - name: Deploy to Server
-      uses: easingthemes/ssh-deploy@main
-      with:
-          SSH_PRIVATE_KEY: ${{ vars.SSH_SECRET }}
-          ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "./"
-          REMOTE_HOST: ${{ vars.SSH_HOST }}
-          REMOTE_USER: ${{ vars.SSH_USER }}
-          TARGET: ${{ vars.DEPLOY_PATH }}
+      uses: AEnterprise/rsync-deploy@v1.0.2
+        env:
+          DEPLOY_KEY: ${{ vars.SSH_SECRET }}
+          ARGS: "-e -c -r --delete"
+          SERVER_PORT: 22
+          FOLDER: "./"
+          SERVER_IP: ${{ vars.SSH_HOST }}
+          USERNAME: ${{ vars.SSH_USER }}
+          SERVER_DESTINATION: ${{ vars.DEPLOY_PATH }}
