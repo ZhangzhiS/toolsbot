@@ -12,11 +12,11 @@ jobs:
     - uses: actions/checkout@v3
     - name: Deploy to Server
       uses: AEnterprise/rsync-deploy@v1.0.2
-        env:
-          DEPLOY_KEY: ${{ vars.SSH_SECRET }}
-          ARGS: "-e -c -r --delete"
-          SERVER_PORT: 22
-          FOLDER: "./"
-          SERVER_IP: ${{ vars.SSH_HOST }}
-          USERNAME: ${{ vars.SSH_USER }}
-          SERVER_DESTINATION: ${{ vars.DEPLOY_PATH }}
+      env:
+        DEPLOY_KEY: ${{ vars.SSH_SECRET }}
+        ARGS: "-e -c -r --delete"
+        SERVER_PORT: "22"
+        FOLDER: "./"
+        SERVER_IP: ${{ vars.SSH_HOST }}
+        USERNAME: ${{ vars.SSH_USER }}
+        SERVER_DESTINATION: ${{ vars.DEPLOY_PATH }}
