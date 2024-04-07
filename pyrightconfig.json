@@ -1,9 +1,0 @@
-{
-  "reportGeneralTypeIssues": true,
-  "reportInferenceIssues": true,
-  "reportUnusedVariable": true,
-  "useLibraryCodeForTypes": false,
-  "disable": {
-    "reportAssignmentType": ["Dict[str, Bot] to Bot"]
-  }
-}

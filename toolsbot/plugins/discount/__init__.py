@@ -27,9 +27,17 @@ async def _(event: Event):
         return
     if event.sender != "wxid_hdo76qijifvz22":
         return
-    return await forward_plugin.send(
-        "",
-        wx_ctrl=SendTextMessage.model_validate(
-            dict(post_data={"receiver": "34407719097@chatroom", "msg": event.content, "aters": ""})
+    res = await dtk_cli.get_jd_url_content(event.content)
+    if res:
+        return await forward_plugin.send(
+            "",
+            wx_ctrl=SendTextMessage.model_validate(
+                dict(
+                    post_data={
+                        "receiver": "34407719097@chatroom",
+                        "msg": event.content,
+                        "aters": "",
+                    }
+                )
+            ),
         )
-    )

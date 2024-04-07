@@ -1,7 +1,6 @@
 from nonebot import logger
-from typing_extensions import override
-
 from nonebot.adapters import Event as BaseEvent
+from typing_extensions import override
 
 from .message import Message
 from .model import MSG_TYPE
@@ -30,9 +29,9 @@ class Event(BaseEvent):
             raise ValueError("CallBack type ERROR!!")
         if _type == 1:
             if data.get("is_group"):
-                return GroupMessageEvent.model_validate(data)
+                return GroupMessageEvent.validate(data)
             else:
-                return PrivateMessageEvent.model_validate(data)
+                return PrivateMessageEvent.validate(data)
         return event_map[_type].model_validate(data)
 
     @override
@@ -48,12 +47,12 @@ class Event(BaseEvent):
         return f"{self.__class__} {self.content}"
 
     @override
-    def get_message(self) -> Message:
-        raise ValueError("Event has no message!")
+    def get_message(self) -> "Message":
+        return Message()
 
     @override
     def get_user_id(self) -> str:
-        raise ValueError("Event has no user_id!")
+        return self.sender
 
     @override
     def get_session_id(self) -> str:
@@ -76,11 +75,9 @@ class Event(BaseEvent):
 
 
 class MessageEvent(Event):
-    @override
     def is_tome(self) -> bool:
         return True
 
-    @override
     def get_type(self) -> str:
         return "message"
 
@@ -107,18 +104,15 @@ class MessageEvent(Event):
 
 
 class GroupMessageEvent(MessageEvent):
-    @override
     def is_tome(self) -> bool:
         return self.is_at_me
 
 
 class PrivateMessageEvent(MessageEvent):
-    @override
     def is_tome(self) -> bool:
         return True
 
 
 class NoticeEvent(Event):
-
     def get_type(self) -> str:
         return "notice"

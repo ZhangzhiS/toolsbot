@@ -12,3 +12,11 @@ adapters = [
 plugins = []
 plugin_dirs = ["toolsbot/plugins"]
 builtin_plugins = []
+
+[tool.pyright]
+include = ["toolsbot"]
+exclude = [
+  "**/node_modules",
+  "**/__pycache__",
+]
+# reportIncompatibleMethodOverride = "none"

@@ -1,16 +1,17 @@
-from typing import Type, Union, Mapping, Iterable
+from typing import Iterable, Type
+
+from nonebot.adapters import (
+    Message as BaseMessage,
+)
+from nonebot.adapters import (
+    MessageSegment as BaseMessageSegment,
+)
 from typing_extensions import override
-from nonebot import logger
-
-from nonebot.adapters import Message as BaseMessage, MessageSegment as BaseMessageSegment
-
-from toolsbot.adapters.wechat.model import TextMsgReply
 
 
 class MessageSegment(BaseMessageSegment["Message"]):
 
     @classmethod
-    @override
     def get_message_class(cls) -> Type["Message"]:
         return Message
 
@@ -31,12 +32,7 @@ class MessageSegment(BaseMessageSegment["Message"]):
         return MessageSegment("text", data)
 
 
-class DiscountSegment(MessageSegment):
-    pass
-
-
 class Message(BaseMessage[MessageSegment]):
-
     @classmethod
     @override
     def get_segment_class(cls) -> Type[MessageSegment]:
@@ -46,5 +42,3 @@ class Message(BaseMessage[MessageSegment]):
     @override
     def _construct(msg: str) -> Iterable[MessageSegment]:
         yield MessageSegment.text(msg)
-
-

@@ -7,7 +7,7 @@ import os
 from typing import Tuple
 
 import httpx
-from nonebot import get_plugin_config
+from nonebot import get_plugin_config, logger
 
 # import aiohttp
 
@@ -142,10 +142,17 @@ class AsyncClient(BaseClient):
     async def get_jd_url_content(self, content) -> str:
         status, resp = await self.request(GetJdUrlContent(content))
         if status:
+            logger.error(f"""
+            
+            请求大淘客 ： {resp}」
+            """)
             n = resp.get("data", {}).get("content", "")
-            if n:
+            if n != content:
                 return n
-        return content
+        logger.error(f"""
+        请求大淘客异常 ： {resp}」
+        """)
+        return ""
 
 
 dtk_cli = AsyncClient()
