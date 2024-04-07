@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: centos-latest
 
     steps:
     - uses: actions/checkout@v3
@@ -15,7 +15,7 @@ jobs:
       with:
           SSH_PRIVATE_KEY: ${{ vars.SSH_SECRET }}
           ARGS: "-rlgoDzvc -i --delete"
-          SOURCE: "dist/"
+          SOURCE: "./"
           REMOTE_HOST: ${{ vars.SSH_HOST }}
           REMOTE_USER: ${{ vars.SSH_USER }}
           TARGET: ${{ vars.DEPLOY_PATH }}
