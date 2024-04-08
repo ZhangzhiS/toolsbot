@@ -24,9 +24,6 @@ wxid = on_keyword(
 
 
 @wxid.handle()
-async def _(event: Event):
-    wx_ctrl=SendTextMessageAPI.model_validate(
-            dict(post_data={"receiver": event.sender, "msg": "dong", "aters": ""})
-        )
+async def _():
     msg = SendTextMessage("dong")
-    await wxid.send(msg, wx_ctrl=wx_ctrl)
+    await wxid.send(msg)

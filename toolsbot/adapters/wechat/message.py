@@ -58,13 +58,13 @@ class MessageSegment(BaseMessageSegment["Message"]):
         return Text("text", {"text": str(text)})
 
     @staticmethod
-    def at(user_id: str = ""):
-        return At("at", {"user_id": user_id})
+    def at(wxid: str = ""):
+        return At("at", {"wxid": wxid})
 
     @staticmethod
     def api(api: WechatHookApi):
         return WeCahtApi("api", {"api": api})
-    
+
     @staticmethod
     def receiver(receiver: str):
         return Receiver("receiver", {"receiver": receiver})
@@ -95,6 +95,7 @@ class WeCahtApi(MessageSegment):
     def __str__(self) -> str:
         return self.data["api"].__class__.__name__
 
+
 class _Receiver(TypedDict):
     receiver: str
 
@@ -124,7 +125,7 @@ class Text(MessageSegment):
 
 
 class _AtData(TypedDict):
-    user_id: str
+    wxid: str
 
 
 @dataclass
@@ -134,7 +135,7 @@ class At(MessageSegment):
 
     @override
     def __str__(self) -> str:
-        return f"@{self.data['user_id']}"
+        return f"@{self.data['wxid']}"
 
 
 class _ImageData(TypedDict):
@@ -195,7 +196,6 @@ class Hongbao(MessageSegment):
 
 class Message(BaseMessage[MessageSegment]):
     req: WechatHookApi = WechatHookApi()
-    receiver: str
 
     @classmethod
     @override
@@ -208,14 +208,12 @@ class Message(BaseMessage[MessageSegment]):
         yield Text("text", {"text": msg})
 
     def validate(self) -> bool:
-        if len(self.get("receiver")) < 1:
-            raise Exception
-        elif len(self.get("text")) < 1:
+        if len(self.get("text")) < 1:
             raise Exception
         return True
-    
-    def serialize(self) -> Dict[str, str]:
-        return dict()
+
+    def serialize(self, receiver) -> Dict[str, str]:
+        ...
 
 
 class SendTextMessage(Message):
@@ -223,15 +221,14 @@ class SendTextMessage(Message):
     msg: str
 
     def validate(self) -> bool:
-        if len(self.get("receiver")) < 1:
-            raise Exception
-        elif len(self.get("text")) < 1:
+        if len(self.get("text")) < 1:
             raise Exception
         return True
 
-    def serialize(self) -> Dict[str, str]:
-        aters = self.get("at")
-        return dict()
+    def serialize(self, receiver: str) -> Dict[str, str]:
+        aters = ",".join([str(i) for i in self.get("at")])
+        message = " ".join([str(i) for i in self.get("text")])
+        return dict(aters=aters, msg=message, receiver=receiver)
 
     @classmethod
     @override
@@ -251,4 +248,3 @@ class SendTextMessage(Message):
                 text_list.append(str(seg))
 
         return "".join(text_list)
-

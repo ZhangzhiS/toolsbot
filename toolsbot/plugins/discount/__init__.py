@@ -1,9 +1,9 @@
-from nonebot import get_plugin_config, logger, on_keyword
+from nonebot import get_plugin_config, on_keyword
 from nonebot.plugin import PluginMetadata
 
 from toolsbot.adapters.wechat.event import Event
+from toolsbot.adapters.wechat.message import SendTextMessage
 from toolsbot.utils.dtk import dtk_cli
-from toolsbot.adapters.wechat.api import SendTextMessageAPI
 
 from .config import Config
 
@@ -27,15 +27,5 @@ async def _(event: Event):
         return
     res = await dtk_cli.get_jd_url_content(event.content)
     if res:
-        return await forward_plugin.send(
-            "",
-            wx_ctrl=SendTextMessageAPI.model_validate(
-                dict(
-                    post_data={
-                        "receiver": "34407719097@chatroom",
-                        "msg": event.content,
-                        "aters": "",
-                    }
-                )
-            ),
-        )
+        msg = SendTextMessage(res)
+        return await forward_plugin.finish(msg, receiver="34407719097@chatroom")

@@ -18,18 +18,14 @@ if TYPE_CHECKING:
 
 def pre_build_msg(event: Event, msg: Union[str, "Message", "MessageSegment"]) -> Message:
     if isinstance(event, GroupMessageEvent):
-        receiver = MessageSegment.receiver(event.roomid)
         at = MessageSegment.at(event.sender)
-    elif isinstance(event, PrivateMessageEvent):
-        receiver = MessageSegment.receiver(event.sender)
-        at = MessageSegment.at()
     else:
-        raise WechatHookException("事件不支持")
+        at = MessageSegment.at()
     if isinstance(msg, str):
-        return SendTextMessage(msg) + at + receiver
+        return SendTextMessage(msg) + at
     elif isinstance(msg, MessageSegment):
         if msg.is_text:
-            return SendTextMessage(msg) + at + receiver
+            return SendTextMessage(msg) + at
     elif isinstance(msg, Message):
         return msg
     raise WechatHookException("message 类型错误")
@@ -47,15 +43,18 @@ class Bot(BaseBot):
         message: Union[str, "Message", "MessageSegment"],
         **kwargs: Any,
     ) -> Any:
-        wx_ctrl: Optional[WechatHookApi] = kwargs.get("wx_ctrl")
-        if not wx_ctrl:
-            return
+        receiver = kwargs.get("receiver")
+        if not receiver:
+            if isinstance(event, GroupMessageEvent):
+                receiver = event.roomid
+            else:
+                receiver = event.sender
         msg: Message = pre_build_msg(event, message)
         if not msg.validate():
             return
-            raise Exception("异常")
+        logger.debug(msg.serialize(receiver))
         await self.call_api(
-            msg.req.api, method=msg.req.method.value, data=wx_ctrl.post_data
+            msg.req.api, method=msg.req.method.value, data=msg.serialize(receiver)
         )
 
     async def handle_event(self, event: Event) -> None:
