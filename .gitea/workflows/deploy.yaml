@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: https://mirror.ghproxy.com/https://github.com/actions/checkout@v3
     - name: Deploy to Server
       uses: AEnterprise/rsync-deploy@v1.0.2
       env:
