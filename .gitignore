@@ -168,6 +168,8 @@ venv.bak/
 
 alembic.ini
 
+.pdm-python
+
 # Spyder project settings
 .spyderproject
 .spyproject
