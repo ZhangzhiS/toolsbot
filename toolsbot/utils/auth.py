@@ -1,7 +1,7 @@
 import base64
 
 
-def get_code(callback_url, wxid):
+def get_code(callback_url: str, wxid: str) -> str:
     code = wxid + '|' + callback_url
     return base64.b64encode(code.encode()).decode()  # 进行base64编码
 

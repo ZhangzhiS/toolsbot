@@ -9,10 +9,14 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     "app" VARCHAR(100) NOT NULL,
     "content" JSONB NOT NULL
 );
+CREATE TABLE IF NOT EXISTS "modelbase" (
+    "id" SERIAL NOT NULL PRIMARY KEY
+);
+COMMENT ON TABLE "modelbase" IS '自动添加模块';
 CREATE TABLE IF NOT EXISTS "wechat_bot" (
     "id" SERIAL NOT NULL PRIMARY KEY,
-    "create_time" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
-    "delete_time" BIGINT NOT NULL,
+    "created_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+    "modified_at" TIMESTAMPTZ NOT NULL  DEFAULT CURRENT_TIMESTAMP,
     "token" VARCHAR(64) NOT NULL,
     "api_host" VARCHAR(64) NOT NULL,
     "wxid" VARCHAR(32) NOT NULL,

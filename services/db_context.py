@@ -22,6 +22,11 @@ class Config(BaseModel):
     database_url: str
 
 
+class TimestampMixin():
+    created_at = fields.DatetimeField(auto_now_add=True)
+    modified_at = fields.DatetimeField(auto_now_add=True)
+
+
 class ModelBase(Model):
     """
     自动添加模块
@@ -31,14 +36,6 @@ class ModelBase(Model):
     """
 
     id = fields.IntField(pk=True, generated=True, auto_increment=True)
-    create_time = fields.DatetimeField(auto_now_add=True)
-    delete_time = fields.BigIntField()
-
-    def __init_subclass__(cls, **kwargs):
-        MODELS.append(cls.__module__)
-
-        if func := getattr(cls, "_run_script", None):
-            SCRIPT_METHOD.append((cls.__module__, func))
 
     class Meta:
         abstract = True
