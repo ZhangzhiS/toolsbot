@@ -18,12 +18,8 @@ def get():
 async def _(request: Request):
     user_id = request.state.user_id
     query = {"user_id": user_id}
-    # bots: Bot = get_bots()
-    bots = WeChatBot.get_bots(query)
-    logger.error(bots)
-    res = []
+    bots = await WeChatBot.get_bots()
     return bots
-
 
 @wx_bot_route.post("/bot")
 async def _(wx_bot_info: CreateWeChatBot, request: Request):

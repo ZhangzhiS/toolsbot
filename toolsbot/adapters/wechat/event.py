@@ -19,7 +19,7 @@ class Event(BaseEvent):
     def json_to_event(cls, data: dict) -> "Event":
         event_map = {
             MSG_TYPE.TEXT_MSG.value: MessageEvent,
-            MSG_TYPE.NOTICE_MSG.value: NoticeEvent,
+            MSG_TYPE.WECHATINIT_MSG.value: WeChatInitEvent,
         }
         _type = data.get("type", 0)
         logger.error(data)
@@ -116,3 +116,8 @@ class PrivateMessageEvent(MessageEvent):
 class NoticeEvent(Event):
     def get_type(self) -> str:
         return "notice"
+
+
+class WeChatInitEvent(Event):
+    def get_type(self) -> str:
+        return "wechatInit"

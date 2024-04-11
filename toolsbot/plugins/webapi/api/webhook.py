@@ -1,11 +1,10 @@
 import time
-import httpx
 from typing import Optional
+
+import httpx
 from fastapi import APIRouter
 from nonebot import get_driver
 from pydantic import BaseModel
-
-from toolsbot.adapters.wechat.bot import Bot
 
 utils_route = APIRouter(prefix="/wh")
 config = get_driver().config

@@ -9,7 +9,7 @@ class MSG_TYPE(Enum):
     TEXT_MSG = 1
     IMAGE_MSG = 3
     VOICE_MSG = 34
-    NOTICE_MSG = 51
+    WECHATINIT_MSG = 51
     INVITE_INTO_GROUP = 10000
 
 

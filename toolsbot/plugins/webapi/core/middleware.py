@@ -32,6 +32,9 @@ class LogtoAuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request, call_next):
+        whitelist = ["/wechat/callback"]
+        if request.url.path in whitelist:
+            return await call_next(request)
         auth = request.headers.get("Authorization")
         if not auth:
             return write_not_authed()
@@ -41,13 +44,7 @@ class LogtoAuthMiddleware(BaseHTTPMiddleware):
         elif content[0] != "Bearer":
             return write_not_authed("token type not support")
         token = content[1]
-
         jwks = await fetch_jwks_uri()
-
-        logger.info(f"jwks: {jwks}")
-        # logger.info(f"token: {jwt.get_unverified_header(token)}")
-        logger.info(f"config: {config}")
-
         try:
             payload = jwt.decode(
                 token,
@@ -55,12 +52,11 @@ class LogtoAuthMiddleware(BaseHTTPMiddleware):
                 algorithms=jwt.get_unverified_header(token).get("alg"),
                 audience="http://127.0.0.1:8080",
                 issuer=config.logto_issuer,
-                options={"verify_at_hash": True},
+                options={"verify_at_hash": False},
             )
         except Exception as e:
             return write_not_authed(str(e))
 
         request.state.user_id = payload.get("sub")
         response = await call_next(request)
-        response = {"msg": "success", "success": 1, "data": response}
         return response

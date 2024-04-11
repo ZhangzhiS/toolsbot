@@ -1,7 +1,9 @@
 from typing import Dict
-from pydantic import BaseModel
-from services.db_context import ModelBase, TimestampMixin
+
+from nonebot import logger
 from tortoise import fields
+
+from services.db_context import ModelBase, TimestampMixin
 from toolsbot.plugins.webapi.api import params
 
 
@@ -26,7 +28,6 @@ class WeChatBot(ModelBase, TimestampMixin):
         return await cls.create(**info.model_dump())
 
     @classmethod
-    async def get_bots(cls, query: Dict[str, str]):
-        # bots = await cls.get(user_id=query.get("user_id"))
-        bots = await cls.get(kwargs=query)
+    async def get_bots(cls):
+        bots = await cls.all().values("wxid", "nickname", "callback_url", "code")
         return bots

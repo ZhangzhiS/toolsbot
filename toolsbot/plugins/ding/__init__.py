@@ -1,12 +1,8 @@
-
-# from nonebot.params import Command
+from nonebot import on_keyword
 from nonebot.plugin import PluginMetadata
-from nonebot import logger, on_keyword
 from nonebot.rule import to_me
-from toolsbot.adapters.wechat.api import SendTextMessageAPI
-from toolsbot.adapters.wechat.event import Event
-from toolsbot.adapters.wechat.message import SendTextMessage, MessageSegment
 
+from toolsbot.adapters.wechat.message import SendTextMessage
 
 __plugin_meta__ = PluginMetadata(
     name="叮咚测试",

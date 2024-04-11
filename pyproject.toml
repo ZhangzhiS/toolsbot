@@ -12,6 +12,9 @@ dependencies = [
     "tortoise-orm[asyncpg]>=0.20.0",
     "aerich>=0.7.2",
     "python-jose[ecdsa]>=3.3.0",
+    "nonebot-plugin-htmlrender>=0.3.1",
+    "pillow>=10.3.0",
+    "arclet-alconna>=1.8.7",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
