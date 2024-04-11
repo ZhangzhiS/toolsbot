@@ -1,4 +1,14 @@
+import json
 import base64
+from typing import Dict
+
+
+def encode_info(info: Dict[str, str]):
+    return base64.b64encode(json.dumps(info).encode()).decode()
+
+
+def decode_info(code: str) -> Dict[str, str]:
+    return json.loads(base64.b64decode(code).decode())
 
 
 def get_code(callback_url: str, wxid: str) -> str:

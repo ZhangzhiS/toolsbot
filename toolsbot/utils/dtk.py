@@ -142,16 +142,9 @@ class AsyncClient(BaseClient):
     async def get_jd_url_content(self, content) -> str:
         status, resp = await self.request(GetJdUrlContent(content))
         if status:
-            logger.error(f"""
-            
-            请求大淘客 ： {resp}」
-            """)
             n = resp.get("data", {}).get("content", "")
             if n != content:
                 return n
-        logger.error(f"""
-        请求大淘客异常 ： {resp}」
-        """)
         return ""
 
 

@@ -17,7 +17,7 @@ def get():
 @wx_bot_route.get("/bots")
 async def _(request: Request):
     user_id = request.state.user_id
-    query = {"user_id": user_id}
+    # query = {"user_id": user_id}
     bots = await WeChatBot.get_bots()
     return bots
 

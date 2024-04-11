@@ -1,6 +1,4 @@
-from typing import Dict
 
-from nonebot import logger
 from tortoise import fields
 
 from services.db_context import ModelBase, TimestampMixin
