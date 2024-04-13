@@ -87,7 +87,7 @@ class Weather:
         )
 
         res = res.json()
-        logger.debug(res)
+        # logger.debug(res)
         if res["code"] == "404":
             raise CityNotFoundError()
         elif res["code"] != "200":
@@ -111,7 +111,7 @@ class Weather:
 
     def _check_response(self, response: Response) -> bool:
         if response.status_code == 200:
-            logger.debug(f"{response.json()}")
+            # logger.debug(f"{response.json()}")
             return True
         else:
             raise APIError(f"Response code:{response.status_code}")

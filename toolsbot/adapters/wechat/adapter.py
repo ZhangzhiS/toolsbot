@@ -1,36 +1,34 @@
 import asyncio
-import os
 import json
+import os
 from typing import Any, cast
-from typing_extensions import override
-from nonebot import logger
+from urllib.parse import urljoin
 
+from nonebot import logger
+from nonebot.adapters import Adapter as BaseAdapter
 from nonebot.drivers import (
     URL,
-    Driver,
-    Request,
-    Response,
     ASGIMixin,
+    Driver,
     HTTPClientMixin,
     HTTPServerSetup,
+    Request,
+    Response,
 )
+from typing_extensions import override
 
-from nonebot.adapters import Adapter as BaseAdapter
-
+from toolsbot.utils.auth import parse_code
 
 from .bot import Bot
-from .event import Event
 from .config import Config
+from .event import Event
 from .exception import WechatHookException
 from .model import GetUserInfoResponse
-from toolsbot.utils.auth import parse_code
 
 
 class Adapter(BaseAdapter):
     def __init__(self, driver: Driver, **kwargs: Any):
         super().__init__(driver, **kwargs)
-        self.default_wechat_url = "http://192.168.68.111:10010/"
-        self.bot_config: Config
         self.setup()
 
     def setup(self) -> None:
@@ -53,14 +51,13 @@ class Adapter(BaseAdapter):
             self.__handle_http,
         )
         self.setup_http_server(setup)
-        # self.driver.on_startup(self._register_bot)
 
     def check_at_bot(self, bot, msg_content: str) -> bool:
         return f"@{bot.wx_config.nickname}" in msg_content
 
     async def _register_bot(self, config: Config) -> None:
-        api = "userinfo"
-        url = os.path.join(config.callback_url, api)
+        api = "proxy/userinfo"
+        url = urljoin(config.callback_url, api)
         req = Request(
             "get",
             url,
@@ -68,16 +65,12 @@ class Adapter(BaseAdapter):
         resp = await self.send_request(req)
         if resp.status_code != 200:
             return
-        if (data := resp.content) is not None:
+        data = resp.content
+        if data is not None:
             data = json.loads(data)
             userinfo_resp = GetUserInfoResponse.model_validate(data)
-            bot_config = Config(
-                wxid=userinfo_resp.data.wxid,
-                callback_url=self.default_wechat_url,
-                nickname=userinfo_resp.data.name,
-            )
-            self.bot_config = bot_config
-            bot = Bot(self, self_id=userinfo_resp.data.wxid, config=bot_config)
+            config.nickname = userinfo_resp.data.name
+            bot = Bot(self, self_id=config.wxid, config=config)
             self.bot_connect(bot)
 
     def _check_request(self, request: Request) -> Config:
@@ -89,7 +82,6 @@ class Adapter(BaseAdapter):
         if not wxid or not host:
             raise WechatHookException("请求缺少参数")
         config = dict(wxid=wxid, callback_url=host, nickname="")
-        logger.warning(config)
         return Config.model_validate(config)
 
     async def __handle_http(self, request: Request) -> Response:

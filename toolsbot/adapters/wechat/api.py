@@ -9,18 +9,24 @@ class METHOD(str, enum.Enum):
 
 
 class WechatHookApi(BaseModel):
-
     api: str = ""
     method: METHOD = METHOD.GET
 
     def validate(self) -> bool:
         return True
 
+
 class SendTextMessageAPI(WechatHookApi):
     api: Optional[str] = "text"
     method: Optional[METHOD] = METHOD.POST
+
 
 class TextMessageParams(BaseModel):
     at: str
     receiver: str
     msg: str
+
+
+class SendImageMessageAPI(WechatHookApi):
+    api: Optional[str] = "proxy/image"
+    method: Optional[METHOD] = METHOD.POST

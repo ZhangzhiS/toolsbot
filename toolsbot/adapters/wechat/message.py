@@ -17,7 +17,7 @@ from nonebot.adapters import (
     MessageSegment as BaseMessageSegment,
 )
 from typing_extensions import override
-from .api import SendTextMessageAPI, WechatHookApi
+from .api import SendImageMessageAPI, SendTextMessageAPI, WechatHookApi
 
 
 class MessageSegment(BaseMessageSegment["Message"]):
@@ -56,6 +56,10 @@ class MessageSegment(BaseMessageSegment["Message"]):
     @staticmethod
     def text(text: str) -> "Text":
         return Text("text", {"text": str(text)})
+
+    @staticmethod
+    def image(path: str) -> "Image":
+        return Image("image", {"path": path})
 
     @staticmethod
     def at(wxid: str = ""):
@@ -139,7 +143,7 @@ class At(MessageSegment):
 
 
 class _ImageData(TypedDict):
-    image_key: str
+    path: str
 
 
 @dataclass
@@ -149,7 +153,7 @@ class Image(MessageSegment):
 
     @override
     def __str__(self) -> str:
-        return f"[image:{self.data['image_key']!r}]"
+        return self.data["path"]
 
 
 class _ShareChatData(TypedDict):
@@ -212,8 +216,7 @@ class Message(BaseMessage[MessageSegment]):
             raise Exception
         return True
 
-    def serialize(self, receiver) -> Dict[str, str]:
-        ...
+    def serialize(self, receiver) -> Dict[str, str]: ...
 
 
 class SendTextMessage(Message):
@@ -248,3 +251,22 @@ class SendTextMessage(Message):
                 text_list.append(str(seg))
 
         return "".join(text_list)
+
+
+class SendImageMessage(Message):
+    req: WechatHookApi = SendImageMessageAPI()
+    path: str
+
+    def serialize(self, receiver) -> Dict[str, str]:
+        path = self.get("image")[0]
+        return dict(receiver=receiver, path=str(path))
+
+    def validate(self) -> bool:
+        if len(self.get("image")) != 1:
+            raise Exception
+        return True
+
+    @staticmethod
+    @override
+    def _construct(path: str) -> Iterable[MessageSegment]:
+        yield Image("image", {"path": path})

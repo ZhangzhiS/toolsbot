@@ -1,14 +1,30 @@
-from nonebot import on_command, on_keyword, require
-from nonebot.log import logger
-from nonebot.matcher import Matcher
-from nonebot.plugin import PluginMetadata
+import datetime
+from urllib.parse import urljoin
+
+import asyncio_oss
+import oss2
 from arclet.alconna import Alconna, Args
+from nonebot import on_keyword, require
+from nonebot.log import logger
+from nonebot.plugin import PluginMetadata
 
 from toolsbot.adapters.wechat.event import Event
+from toolsbot.adapters.wechat.message import SendImageMessage
 
 require("nonebot_plugin_htmlrender")
 
-from .config import DEBUG, QWEATHER_APIKEY, QWEATHER_APITYPE, Config  # noqa: E402
+from .config import (  # noqa: E402
+    DEBUG,
+    IMAGE_DOMAIN,
+    OSS2_ACCESS_KEY_ID,
+    OSS2_ACCESS_KEY_SECRET,
+    OSS2_BUCKET_NAME,
+    OSS2_ENDPOINT,
+    OSS2_PATH_PREFIX,
+    QWEATHER_APIKEY,
+    QWEATHER_APITYPE,
+    Config,
+)
 from .render_pic import render  # noqa: E402
 from .weather_data import CityNotFoundError, ConfigError, Weather  # noqa: E402
 
@@ -24,8 +40,16 @@ __plugin_meta__ = PluginMetadata(
 if DEBUG:
     logger.debug("将会保存图片到 weather.png")
 
+OSS_AUTH = oss2.Auth(OSS2_ACCESS_KEY_ID, OSS2_ACCESS_KEY_SECRET)
 
-weather = on_keyword({"天气",}, block=True, priority=1)
+
+weather = on_keyword(
+    {
+        "天气",
+    },
+    block=True,
+    priority=1,
+)
 
 
 cmd_parse = Alconna("天气", Args["city", str])
@@ -35,7 +59,12 @@ cmd_parse.shortcut(r"^天气(?P<city>.+)$", {"args": ["{city}"], "fuzzy": False}
 
 @weather.handle()
 async def _(event: Event):
-    if QWEATHER_APIKEY is None or QWEATHER_APITYPE is None:
+    if (
+        QWEATHER_APIKEY is None
+        or QWEATHER_APITYPE is None
+        or OSS2_ACCESS_KEY_SECRET is None
+        or OSS2_ACCESS_KEY_ID is None
+    ):
         raise ConfigError("请设置 qweather_apikey 和 qweather_apitype")
 
     params = cmd_parse.parse(event.content)
@@ -54,10 +83,22 @@ async def _(event: Event):
 
     img = await render(w_data)
 
-    if True:
+    if False:
         debug_save_img(img)
 
-    # await weather.send("")
+    img_path = await save_to_oss(w_data.city_id, img)
+    await weather.finish(SendImageMessage(img_path))
+
+
+async def save_to_oss(city_id, img: bytes) -> str:
+    key_time = datetime.datetime.today().strftime("%Y-%m-%d")
+    key = f"{OSS2_PATH_PREFIX}/{key_time}-{city_id}.png"
+    logger.info(key)
+    async with asyncio_oss.Bucket(OSS_AUTH, OSS2_ENDPOINT, OSS2_BUCKET_NAME) as bucket:
+        if await bucket.object_exists(key):
+            return urljoin(IMAGE_DOMAIN or "https://img.zzs7.top", key)
+        await bucket.put_object(key, img)
+    return urljoin(IMAGE_DOMAIN or "https://img.zzs7.top", key)
 
 
 def debug_save_img(img: bytes) -> None:

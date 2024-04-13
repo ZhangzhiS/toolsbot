@@ -15,6 +15,8 @@ dependencies = [
     "nonebot-plugin-htmlrender>=0.3.1",
     "pillow>=10.3.0",
     "arclet-alconna>=1.8.7",
+    "nb-cli>=1.4.1",
+    "asyncio-oss>=1.1.4",
 ]
 requires-python = "==3.10.*"
 readme = "README.md"
@@ -26,7 +28,7 @@ distribution = false
 
 [tool.pdm.dev-dependencies]
 dev = [
-    "nb-cli>=1.4.1",
+    # "nb-cli>=1.4.1",
 ]
 
 [tool.nonebot]

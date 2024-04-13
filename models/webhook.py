@@ -1,4 +1,3 @@
-
 from enum import Enum
 from tortoise import fields
 
@@ -18,3 +17,6 @@ class WebhookAuth(ModelBase, TimestampMixin):
         table = "webhook_auth"
         table_description = "webhook 授权表"
 
+
+class WebhookHistory:
+    pass
