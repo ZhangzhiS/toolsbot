@@ -22,7 +22,7 @@ class Config(BaseModel):
     database_url: str
 
 
-class TimestampMixin():
+class TimestampMixin:
     created_at = fields.DatetimeField(auto_now_add=True)
     modified_at = fields.DatetimeField(auto_now_add=True)
 
@@ -72,7 +72,9 @@ async def __auto_migrate(config, app="toolsbot", location="./migrations", safe=T
         await Migrate.migrate("update")
 
 
-async def __upgrade(tortoise_config, app="toolsbot", location="./migrations", run_in_transaction=True):
+async def __upgrade(
+    tortoise_config, app="toolsbot", location="./migrations", run_in_transaction=True
+):
     command = Command(tortoise_config, app=app, location=location)
     migrated = await command.upgrade(run_in_transaction=run_in_transaction)
     if not migrated:

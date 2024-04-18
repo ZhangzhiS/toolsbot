@@ -17,7 +17,7 @@ from nonebot.drivers import (
 )
 from typing_extensions import override
 
-from toolsbot.utils.auth import parse_code
+from toolsbot.utils.auth import decode_info
 
 from .bot import Bot
 from .config import Config
@@ -59,32 +59,37 @@ class Adapter(BaseAdapter):
         return at_me
 
     async def _register_bot(self, config: Config) -> None:
-        api = "proxy/userinfo"
-        url = urljoin(config.callback_url, api)
-        req = Request(
-            "get",
-            url,
-        )
-        resp = await self.send_request(req)
-        if resp.status_code != 200:
-            return
-        data = resp.content
-        if data is not None:
-            data = json.loads(data)
-            userinfo_resp = GetUserInfoResponse.model_validate(data)
-            config.nickname = userinfo_resp.data.name
-            bot = Bot(self, self_id=config.wxid, config=config)
-            self.bot_connect(bot)
+        bot = Bot(self, self_id=config.wxid, config=config)
+        self.bot_connect(bot)
+        # api = "proxy/userinfo"
+        # url = urljoin(config.callback_url, api)
+        # req = Request(
+        #     "get",
+        #     url,
+        # )
+        # resp = await self.send_request(req)
+        # if resp.status_code != 200:
+        #     return
+        # data = resp.content
+        # if data is not None:
+        #     data = json.loads(data)
+        #     userinfo_resp = GetUserInfoResponse.model_validate(data)
+        #     config.nickname = userinfo_resp.data.name
+        #     bot = Bot(self, self_id=config.wxid, config=config)
+        #     self.bot_connect(bot)
 
     def _check_request(self, request: Request) -> Config:
         if request.method != "POST":
             raise WechatHookException("请求方式错误")
-        url = URL(request.url)
-        code = url.query.get("code")
-        wxid, host = parse_code(code)
-        if not wxid or not host:
+        code = request.headers.get("code", "")
+        if not code:
             raise WechatHookException("请求缺少参数")
-        config = dict(wxid=wxid, callback_url=host, nickname="")
+        info = decode_info(code)
+        config = dict(
+            wxid=info.get("wxid"),
+            callback_url=info.get("callback_url"),
+            nickname=info.get("name"),
+        )
         return Config.model_validate(config)
 
     async def __handle_http(self, request: Request) -> Response:

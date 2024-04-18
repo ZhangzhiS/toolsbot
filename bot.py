@@ -1,8 +1,14 @@
+import os
 import nonebot
 
 from toolsbot.adapters.wechat.adapter import Adapter as WechatAdapter
 
-nonebot.init()
+e_file = "/etc/project/toolsbot/.env"
+
+if os.path.exists(".env"):
+    e_file = ""
+
+nonebot.init(_env_file=e_file)
 
 driver = nonebot.get_driver()
 driver.register_adapter(WechatAdapter)
@@ -14,4 +20,4 @@ driver.on_shutdown(disconnect)
 
 
 if __name__ == "__main__":
-    nonebot.run()
+    nonebot.run(port=8088)

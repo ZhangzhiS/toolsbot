@@ -32,7 +32,7 @@ class LogtoAuthMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
 
     async def dispatch(self, request, call_next):
-        whitelist = ["/wechat/callback"]
+        whitelist = ["/api/wechat/callback"]
         if request.url.path in whitelist:
             return await call_next(request)
         auth = request.headers.get("Authorization")
