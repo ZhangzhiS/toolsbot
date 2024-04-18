@@ -45,15 +45,18 @@ class Adapter(BaseAdapter):
                 f"{self.get_name()} Adapter needs a ASGI Driver to work."
             )
         setup = HTTPServerSetup(
-            URL("/wechat/callback"),
+            URL("/api/wechat/callback"),
             "POST",
             self.get_name(),
             self.__handle_http,
         )
         self.setup_http_server(setup)
 
-    def check_at_bot(self, bot, msg_content: str) -> bool:
-        return f"@{bot.wx_config.nickname}" in msg_content
+    def check_at_bot(self, bot, data: dict) -> bool:
+        at_me = f"@{bot.wx_config.nickname}" in data.get("content", "")
+        if at_me:
+            data["content"] = data["content"].replace(f"@{bot.wx_config.nickname}", "")
+        return at_me
 
     async def _register_bot(self, config: Config) -> None:
         api = "proxy/userinfo"
@@ -97,10 +100,13 @@ class Adapter(BaseAdapter):
         if not self.bots.get(config.wxid):
             await self._register_bot(config)
         bot = self.bots.get(config.wxid)
-        data["is_at_me"] = self.check_at_bot(bot, data.get("content", ""))
+        data["is_at_me"] = self.check_at_bot(bot, data)
         del data["xml"]
-        if event := Event.json_to_event(data):
-            asyncio.create_task(cast(Bot, bot).handle_event(event))
+        try:
+            if event := Event.json_to_event(data):
+                asyncio.create_task(cast(Bot, bot).handle_event(event))
+        except ValueError:
+            pass
         return Response(200)
 
     async def send_request(self, request: Request):

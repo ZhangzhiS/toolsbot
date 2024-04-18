@@ -2,6 +2,7 @@ import datetime
 from urllib.parse import urljoin
 
 import asyncio_oss
+from nonebot.rule import to_me
 import oss2
 from arclet.alconna import Alconna, Args
 from nonebot import on_keyword, require
@@ -49,6 +50,7 @@ weather = on_keyword(
     },
     block=True,
     priority=1,
+    rule=to_me(),
 )
 
 
