@@ -20,4 +20,4 @@ driver.on_shutdown(disconnect)
 
 
 if __name__ == "__main__":
-    nonebot.run(port=8088)
+    nonebot.run(port=8080)

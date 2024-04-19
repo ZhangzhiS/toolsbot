@@ -1,22 +1,23 @@
-from typing import TYPE_CHECKING, Any, Optional, Union
+from typing import TYPE_CHECKING, Any, Union
 
 from nonebot import logger
 from nonebot.adapters import Bot as BaseBot
 from nonebot.message import handle_event
 from typing_extensions import override
 
-from toolsbot.adapters.wechat.api import WechatHookApi
 from toolsbot.adapters.wechat.exception import WechatHookException
 
 from .config import Config
-from .event import Event, GroupMessageEvent, PrivateMessageEvent
+from .event import Event, GroupMessageEvent
 from .message import Message, MessageSegment, SendTextMessage
 
 if TYPE_CHECKING:
     from .adapter import Adapter
 
 
-def pre_build_msg(event: Event, msg: Union[str, "Message", "MessageSegment"]) -> Message:
+def pre_build_msg(
+    event: Event, msg: Union[str, "Message", "MessageSegment"]
+) -> Message:
     if isinstance(event, GroupMessageEvent):
         at = MessageSegment.at(event.sender)
     else:
@@ -30,7 +31,7 @@ def pre_build_msg(event: Event, msg: Union[str, "Message", "MessageSegment"]) ->
         return msg
     raise WechatHookException("message 类型错误")
 
-    
+
 class Bot(BaseBot):
     def __init__(self, adapter: "Adapter", self_id: str, config: Config):
         super().__init__(adapter, self_id)
@@ -53,6 +54,10 @@ class Bot(BaseBot):
         if not msg.validate():
             return
         logger.debug(msg.serialize(receiver))
+        # ENVIRONMENT
+        if self.adapter.env == "dev":
+            # return
+            pass
         await self.call_api(
             msg.req.api, method=msg.req.method.value, data=msg.serialize(receiver)
         )
