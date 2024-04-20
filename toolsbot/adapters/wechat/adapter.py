@@ -124,6 +124,7 @@ class Adapter(BaseAdapter):
                 f"{self.get_name()} Adapter needs a HTTPClient Driver to work."
             )
         url = os.path.join(bot.wx_config.callback_url, api)
+        logger.info(f"Calling {url} with {data}")
         req = Request(
             data["method"],
             url,

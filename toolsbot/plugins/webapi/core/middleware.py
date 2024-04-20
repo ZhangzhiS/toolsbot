@@ -50,7 +50,7 @@ class LogtoAuthMiddleware(BaseHTTPMiddleware):
                 token,
                 jwks,
                 algorithms=jwt.get_unverified_header(token).get("alg"),
-                audience="http://127.0.0.1:8080",
+                audience="https://toolsbot.zzs7.cc",
                 issuer=config.logto_issuer,
                 options={"verify_at_hash": False},
             )
