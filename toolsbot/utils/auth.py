@@ -26,7 +26,7 @@ if __name__ == "__main__":
     u = {
         "wxid": "wxid_lyxq7hnoy8d422",
         "callback_url": "http://192.168.68.111:8081/",
-        "nickname": "",
+        "name": "",
     }
     code = get_code(u["callback_url"], u["wxid"])
     print(code)

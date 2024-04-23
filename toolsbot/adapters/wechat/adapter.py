@@ -54,9 +54,9 @@ class Adapter(BaseAdapter):
         self.setup_http_server(setup)
 
     def check_at_bot(self, bot, data: dict) -> bool:
-        at_me = f"@{bot.wx_config.nickname}" in data.get("content", "")
+        at_me = f"@{bot.wx_config.name}" in data.get("content", "")
         if at_me:
-            data["content"] = data["content"].replace(f"@{bot.wx_config.nickname}", "")
+            data["content"] = data["content"].replace(f"@{bot.wx_config.name}", "")
         return at_me
 
     async def _register_bot(self, config: Config) -> None:
@@ -73,7 +73,7 @@ class Adapter(BaseAdapter):
         config = dict(
             wxid=info.get("wxid"),
             callback_url=info.get("callback_url"),
-            nickname=info.get("name"),
+            name=info.get("name"),
         )
         if self.env == "dev":
             config["callback_url"] = "http://192.168.68.111:10010"

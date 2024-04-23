@@ -10,8 +10,9 @@ class BotTypeEnum(Enum):
 
 class WebhookAuth(ModelBase, TimestampMixin):
     user_id = fields.CharField(64, null=True, description="用户 id")
-    token = fields.CharField(64, null=True, description="推送服务需要的 token")
+    token = fields.CharField(255, null=True, description="推送服务需要的 token")
     bot_type = fields.CharEnumField(BotTypeEnum, null=False, description="机器人类型")
+    remark = fields.CharField(64, null=True, description="备注")
 
     class Meta:
         table = "webhook_auth"

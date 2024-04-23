@@ -54,10 +54,8 @@ class Bot(BaseBot):
         if not msg.validate():
             return
         logger.debug(msg.serialize(receiver))
-        # ENVIRONMENT
         if self.adapter.env == "dev":
             return
-            pass
         await self.call_api(
             msg.req.api, method=msg.req.method.value, data=msg.serialize(receiver)
         )

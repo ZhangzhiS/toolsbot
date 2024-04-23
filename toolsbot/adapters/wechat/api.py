@@ -1,6 +1,6 @@
 import enum
 from typing import Any, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class METHOD(str, enum.Enum):
@@ -30,3 +30,13 @@ class TextMessageParams(BaseModel):
 class SendImageMessageAPI(WechatHookApi):
     api: Optional[str] = "proxy/image"
     method: Optional[METHOD] = METHOD.POST
+
+
+class GetWeChatContactAPI(WechatHookApi):
+    api: str = Field(default="contacts")
+    method: Optional[METHOD] = METHOD.GET
+
+
+class GetBotUserInfoAPI(WechatHookApi):
+    api: str = Field(default="userinfo")
+    method: Optional[METHOD] = METHOD.GET

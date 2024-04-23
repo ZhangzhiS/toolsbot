@@ -1,4 +1,3 @@
-
 from tortoise import fields
 
 from services.db_context import ModelBase, TimestampMixin
@@ -10,9 +9,10 @@ class WeChatBot(ModelBase, TimestampMixin):
     token = fields.CharField(64, null=True, description="访问微信 http API 的 token")
     callback_url = fields.CharField(64, description="微信httpAPI地址")
     wxid = fields.CharField(32, description="机器人微信的 wxid", unique=True)
-    nickname = fields.CharField(32, null=True, description="机器人微信的昵称")
+    name = fields.CharField(32, null=True, description="机器人微信的昵称")
     status = fields.BooleanField(default=True, description="机器人的状态")
     code = fields.CharField(255, null=True, description="请求平台code")
+    remark = fields.CharField(32, null=True, description="备注")
 
     class Meta:
         table = "wechat_bot"
@@ -27,5 +27,22 @@ class WeChatBot(ModelBase, TimestampMixin):
 
     @classmethod
     async def get_bots(cls):
-        bots = await cls.all().values("wxid", "nickname", "callback_url", "code")
+        bots = await cls.all().values("wxid", "name", "callback_url", "code")
         return bots
+
+
+class WeChatBotContact(ModelBase):
+    bot_id = fields.CharField(32, description="机器人微信的 wxid")
+    wxid = fields.CharField(32, description="联系人 wxid")
+    name = fields.CharField(32, null=True, description="联系人昵称")
+    remark = fields.CharField(32, null=True, description="备注")
+
+    class Meta:
+        table = "wechat_bot_contact"
+        table_description = "联系人表"
+
+    @classmethod
+    async def refresh_contact(cls, contacts):
+        """
+        刷新联系人表
+        """
