@@ -55,7 +55,7 @@ async def __auto_migrate(config, app="toolsbot", location="./migrations", safe=T
         dirname.mkdir(parents=True)
         connection = get_app_connection(config, app)
         await generate_schema_for_client(connection, safe)
-        #
+
         schema = get_schema_sql(connection, safe)
 
         version = await Migrate.generate_version()

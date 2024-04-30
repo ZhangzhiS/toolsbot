@@ -14,16 +14,17 @@ from nonebot import get_plugin_config, logger
 from .client import BaseClient, BaseRequest, METHOD
 
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Config(BaseModel):
     """Plugin Config Here"""
 
-    dtk_jd_unionid: int
-    dtk_appkey: str
-    dtk_secret: str
-    dtk_host: str
+    dtk_jd_unionid: int = Field(..., description="DTK的 jd_unionid")
+    dtk_appkey: str = Field(..., description="DTK的 app_key")
+    dtk_secret: str = Field(..., description="DTK的 app_secret")
+    dtk_host: str = Field(..., description="DTK的 host")
+    jd_api_key: str = Field(..., description="京东的 api key")
 
 
 settings = get_plugin_config(Config)
@@ -42,13 +43,32 @@ class GetJdUrlContent(BaseRequest):
     url = "api/dels/jd/kit/content/promotion-union-convert"
     method = METHOD.GET
 
-    def __init__(self, content: str) -> None:
+    def __init__(self, content: str, subUnionId: str = "") -> None:
         super().__init__()
-        self.params = {"unionId": settings.dtk_jd_unionid, "content": content}
+        self.params = {
+            "unionId": settings.dtk_jd_unionid,
+            "content": content,
+            "subUnionId": subUnionId,
+            "positionId": subUnionId,
+        }
+
+
+class GetJdOrder(BaseRequest):
+    url = "api/dels/jd/order/get-official-order-list"
+    method = METHOD.GET
+
+    def __init__(self, start_time: str, end_time: str, search_type: int = 3) -> None:
+        super().__init__()
+        self.params = {
+            "unionId": settings.dtk_jd_unionid,
+            "startTime": start_time,
+            "endTime": end_time,
+            "type": search_type,
+            "key": settings.jd_api_key,
+        }
 
 
 class AsyncClient(BaseClient):
-
     def __init__(self, version="v1.0.0"):
         self.appkey = settings.dtk_appkey
         self.app_secret = settings.dtk_secret
@@ -139,13 +159,21 @@ class AsyncClient(BaseClient):
                 return n
         return url
 
-    async def get_jd_url_content(self, content) -> str:
-        status, resp = await self.request(GetJdUrlContent(content))
+    async def get_jd_url_content(self, content, subUnionId: str = "") -> str:
+        status, resp = await self.request(GetJdUrlContent(content, subUnionId))
         if status:
             n = resp.get("data", {}).get("content", "")
             if n != content:
                 return n
         return ""
+
+    async def get_jd_order(self, start_time: str, end_time: str):
+        status, resp = await self.request(
+            GetJdOrder(start_time=start_time, end_time=end_time)
+        )
+        if status:
+            return resp
+        return {}
 
 
 dtk_cli = AsyncClient()
