@@ -1,12 +1,11 @@
 import datetime
-import json
-import os
+import hashlib
 
 from nonebot import get_plugin_config, logger, on_keyword, require
 
 from nonebot.plugin import PluginMetadata
 
-from models.discount import JdRebate
+from models.discount import JdRebate, PositionIdMap
 from toolsbot.adapters.wechat.event import Event
 from toolsbot.adapters.wechat.message import SendTextMessage
 from toolsbot.utils.dtk import dtk_cli
@@ -40,13 +39,20 @@ async def _(event: Event):
     if event.is_group:
         logger.info("不处理其他群消息中的优惠信息")
         return
-    res = await dtk_cli.get_jd_url_content(event.content, subUnionId=event.sender)
+    position_obj = await PositionIdMap.get_or_none(wxid=event.sender)
+    if not position_obj:
+        position_id = (
+            int(hashlib.sha256(event.sender.encode()).hexdigest(), 16) % 1000000
+        )
+        await PositionIdMap.create(wxid=event.sender, position_id=position_id)
+    else:
+        position_id = position_obj.position_id
+    res = await dtk_cli.get_jd_url_content(event.content, position_id=position_id)
     if not res:
         return await jd_discount.finish("""未找到优惠信息
 暂时只支持京东
 """)
     msg = SendTextMessage(res)
-    logger.info(res)
     await jd_discount.send(msg, receiver=event.sender)
     await jd_discount.finish("通过链接下单，订单完成后即可返利", receiver=event.sender)
 
@@ -56,10 +62,8 @@ async def check_jd_order():
     end = datetime.datetime.now()
     start = end - datetime.timedelta(minutes=15)
     data = await dtk_cli.get_jd_order(
-        # start.strftime("%Y-%m-%d %H:%M:%S"),
-        # end.strftime("%Y-%m-%d %H:%M:%S"),
-        "2024-04-23 11:11:40",
-        "2024-04-23 11:31:40",
+        start.strftime("%Y-%m-%d %H:%M:%S"),
+        end.strftime("%Y-%m-%d %H:%M:%S"),
     )
     order_list = data.get("data", [])
     if not order_list:

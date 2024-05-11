@@ -43,13 +43,15 @@ class GetJdUrlContent(BaseRequest):
     url = "api/dels/jd/kit/content/promotion-union-convert"
     method = METHOD.GET
 
-    def __init__(self, content: str, subUnionId: str = "") -> None:
+    def __init__(
+        self, content: str, subUnionId: str = "", position_id: int = 0
+    ) -> None:
         super().__init__()
         self.params = {
             "unionId": settings.dtk_jd_unionid,
             "content": content,
             "subUnionId": subUnionId,
-            "positionId": subUnionId,
+            "positionId": position_id,
         }
 
 
@@ -159,8 +161,12 @@ class AsyncClient(BaseClient):
                 return n
         return url
 
-    async def get_jd_url_content(self, content, subUnionId: str = "") -> str:
-        status, resp = await self.request(GetJdUrlContent(content, subUnionId))
+    async def get_jd_url_content(
+        self, content, subUnionId: str = "", position_id: int = 0
+    ) -> str:
+        status, resp = await self.request(
+            GetJdUrlContent(content, subUnionId, position_id)
+        )
         if status:
             n = resp.get("data", {}).get("content", "")
             if n != content:

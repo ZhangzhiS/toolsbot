@@ -3,6 +3,18 @@ from tortoise import fields
 from services.db_context import ModelBase, TimestampMixin
 
 
+class PositionIdMap(ModelBase, TimestampMixin):
+    wxid = fields.CharField(64, description="微信 id")
+    position_id = fields.IntField(0, description="推广位 id")
+    withdrawal_amount = fields.DecimalField(
+        default=Decimal("0"),
+        description="已提现金额",
+        max_digits=10,
+        decimal_places=2,
+    )
+    withdrawal_count = fields.IntField(default=0, description="已提现次数")
+
+
 class JdRebate(ModelBase):
     order_id = fields.CharField(64, description="订单号")
     order_time = fields.CharField(64, description="订单时间")
@@ -44,3 +56,4 @@ class JdRebate(ModelBase):
     )
     take_to_wxid = fields.IntField(default=0, description="实际分给wx 用户的金额")
     data = fields.JSONField(description="原始数据", defaule={})
+    withdrawal_status = fields.BooleanField(default=False, description="是否已提现")

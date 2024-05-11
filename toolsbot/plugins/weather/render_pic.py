@@ -30,7 +30,7 @@ async def render(weather: Weather) -> bytes:
             "hours": add_hour_data(weather.hourly.hourly),
         },
         pages={
-            "viewport": {"width": 1000, "height": 300},
+            "viewport": {"width": 100, "height": 30},
             "base_url": f"file://{template_path}",
         },
     )
