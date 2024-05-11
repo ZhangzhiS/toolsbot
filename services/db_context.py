@@ -69,6 +69,7 @@ async def __auto_migrate(config, app="toolsbot", location="./migrations", safe=T
         with open(version_file, "w", encoding="utf-8") as f:
             f.write(content)
     else:
+        await __upgrade(config)
         await Migrate.migrate("update")
 
 
@@ -103,7 +104,6 @@ async def init():
         }
         await Tortoise.init(tortoise_config)
         await __auto_migrate(tortoise_config)
-        await __upgrade(tortoise_config)
     except Exception as e:
         raise Exception(f"数据库连接错误.... {type(e)}: {e}")
 
