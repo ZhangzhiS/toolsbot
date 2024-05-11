@@ -21,6 +21,8 @@ async def render(weather: Weather) -> bytes:
     return await template_to_pic(
         template_path=template_path,
         template_name="weather.html",
+        type="jpeg",
+        quality=73,
         templates={
             "now": weather.now.now,
             "days": add_date(weather.daily.daily),
@@ -30,7 +32,7 @@ async def render(weather: Weather) -> bytes:
             "hours": add_hour_data(weather.hourly.hourly),
         },
         pages={
-            "viewport": {"width": 100, "height": 30},
+            "viewport": {"width": 1000, "height": 300},
             "base_url": f"file://{template_path}",
         },
     )
