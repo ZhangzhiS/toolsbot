@@ -8,6 +8,7 @@ from arclet.alconna import Alconna, Args
 from nonebot import on_keyword, require
 from nonebot.log import logger
 from nonebot.plugin import PluginMetadata
+from nonebot.matcher import Matcher
 
 from toolsbot.adapters.wechat.event import Event
 from toolsbot.adapters.wechat.message import SendImageMessage
@@ -48,7 +49,6 @@ weather = on_keyword(
     {
         "天气",
     },
-    block=True,
     priority=1,
     rule=to_me(),
 )
@@ -60,7 +60,7 @@ cmd_parse.shortcut(r"^天气(?P<city>.+)$", {"args": ["{city}"], "fuzzy": False}
 
 
 @weather.handle()
-async def _(event: Event):
+async def _(event: Event, matcher: Matcher):
     if (
         QWEATHER_APIKEY is None
         or QWEATHER_APITYPE is None
@@ -71,7 +71,10 @@ async def _(event: Event):
 
     params = cmd_parse.parse(event.content)
     if not params.matched:
-        return await weather.finish("请查看输入命令")
+        return
+
+    # 进入天气处理逻辑，阻拦后续的逻辑
+    matcher.stop_propagation()
 
     city = params.main_args.get("city", "")
     w_data = Weather(city_name=city, api_key=QWEATHER_APIKEY, api_type=QWEATHER_APITYPE)
@@ -84,9 +87,6 @@ async def _(event: Event):
         return await weather.finish(f"找不到城市: {city}")
 
     img = await render(w_data)
-
-    if False:
-        debug_save_img(img)
 
     img_path = await save_to_oss(w_data.city_id, img)
     await weather.finish(SendImageMessage(img_path))

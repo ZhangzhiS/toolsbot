@@ -13,6 +13,9 @@ class PositionIdMap(ModelBase, TimestampMixin):
         decimal_places=2,
     )
     withdrawal_count = fields.IntField(default=0, description="已提现次数")
+    take_a_percentage = fields.CharField(
+        3, default="15", description="机器人抽成佣金比例"
+    )
 
 
 class JdRebate(ModelBase):
