@@ -5,6 +5,7 @@ from nonebot.plugin import PluginMetadata
 from nonebot.rule import to_me
 
 from .config import Config
+from .get_message import get_help_msg, get_discount_help_msg
 from toolsbot.adapters.wechat.event import Event
 from toolsbot.adapters.wechat.message import SendTextMessage
 
@@ -38,8 +39,8 @@ async def _(event: Event, matcher: Matcher):
     matcher.stop_propagation()
     cmd = params.main_args.get("command")
     if not cmd:
-        msg = SendTextMessage(f"""帮助：
-返利：私聊发送链接给我，通过转链链接下单，订单完成可以获得返利
-天气：发送城市名称，可以获取天气预报
-""")
+        msg = SendTextMessage(get_help_msg())
+        await helper.finish(msg)
+    if cmd == "返利":
+        msg = SendTextMessage(get_discount_help_msg())
         await helper.finish(msg)
