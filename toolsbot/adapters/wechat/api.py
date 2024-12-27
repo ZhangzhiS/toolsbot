@@ -17,7 +17,7 @@ class WechatHookApi(BaseModel):
 
 
 class SendTextMessageAPI(WechatHookApi):
-    api: Optional[str] = "text"
+    api: Optional[str] = "proxy/text"
     method: Optional[METHOD] = METHOD.POST
 
 

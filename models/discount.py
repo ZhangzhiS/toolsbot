@@ -60,3 +60,4 @@ class JdRebate(ModelBase):
     take_to_wxid = fields.IntField(default=0, description="实际分给wx 用户的金额")
     data = fields.JSONField(description="原始数据", defaule={})
     withdrawal_status = fields.BooleanField(default=False, description="是否已提现")
+    order_status = fields.BooleanField(default=False, description="是否已完成")

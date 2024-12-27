@@ -46,3 +46,8 @@ class WeChatBotContact(ModelBase):
         """
         刷新联系人表
         """
+
+
+class WeChatBotPlugin:
+    bot_id = fields.CharField(32, description="机器人微信的 wxid")
+    plugin_name = fields.CharField(32, description="插件名称")

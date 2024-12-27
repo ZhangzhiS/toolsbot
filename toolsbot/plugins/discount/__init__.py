@@ -1,30 +1,25 @@
 import datetime
 import hashlib
 
-from nonebot import get_plugin_config, logger, on_keyword, require
-
+from nonebot import logger, on_keyword, require, on_command
 from nonebot.plugin import PluginMetadata
+from nonebot.rule import to_me
 
 from models.discount import JdRebate, PositionIdMap
 from toolsbot.adapters.wechat.event import Event
 from toolsbot.adapters.wechat.message import SendTextMessage
 from toolsbot.utils.dtk import dtk_cli
 
-from .config import Config
-
 require("nonebot_plugin_apscheduler")
 
 from nonebot_plugin_apscheduler import scheduler  # noqa: E402
-
 
 __plugin_meta__ = PluginMetadata(
     name="返利插件",
     description="购物返利",
     usage="",
-    config=Config,
 )
 
-config = get_plugin_config(Config)
 
 jd_discount = on_keyword({"https://u.jd.com", "https://3.cn"}, block=True)
 
@@ -52,9 +47,40 @@ async def _(event: Event):
         return await jd_discount.finish("""未找到优惠信息
 暂时只支持京东
 """)
+    res += "\n通过链接下单，订单完成后即可返利"
     msg = SendTextMessage(res)
-    await jd_discount.send(msg, receiver=event.sender)
-    await jd_discount.finish("通过链接下单，订单完成后即可返利", receiver=event.sender)
+    await jd_discount.finish(msg, receiver=event.sender)
+
+
+withdrawal = on_command("提现", rule=to_me())
+
+
+@withdrawal.handle()
+async def _(event: Event):
+    if event.is_group:
+        logger.info("不处理其他群消息中的优惠信息")
+        return
+
+    position_obj = await PositionIdMap.get_or_none(wxid=event.sender)
+    if not position_obj:
+        position_id = (
+            int(hashlib.sha256(event.sender.encode()).hexdigest(), 16) % 1000000
+        )
+        await PositionIdMap.create(wxid=event.sender, position_id=position_id)
+    else:
+        position_id = position_obj.position_id
+    orders = list(
+        await JdRebate.filter(
+            position_id=position_id, withdrawal_status=False, order_status=True
+        ).limit(10)
+    )
+    if len(orders) == 0:
+        return await withdrawal.finish(
+            "暂无可提现订单\n通过我获取商品链接，下单获取返利！"
+        )
+    msg = ""
+    for order in orders:
+        msg += f"{order.sku_name[:6]} "
 
 
 @scheduler.scheduled_job("cron", minute="*/10", id="checkJdOrder")
@@ -100,6 +126,8 @@ async def check_jd_order():
         update_order.actual_fee = new_data.get("actual_fee")
         update_order.modify_time = new_data.get("modify_time")
         update_order.finish_time = new_data.get("finish_time")
+        if update_order.finish_time:
+            update_order.order_status = True
         update_order.data = new_data.get("data")
     if order_objs:
         await JdRebate.bulk_update(
